@@ -24,11 +24,11 @@ export const config: Config = {
         threshold: 'BLOCK_MEDIUM_AND_ABOVE'
       }
     ],
-    defaultModel: 'gemini-3.1-pro-preview',                // chat / text
-    defaultDeepResearchModel: 'gemini-3-flash-preview',  // deep_research (flash for speed)
-    defaultImageAnalysisModel: 'gemini-3.1-pro-preview', // analyze_image
-    defaultImageDescribeModel: 'gemini-3-flash-preview', // describe_image (lighter task)
-    defaultImageGenerationModel: 'gemini-3-pro-image-preview', // generate_image / edit_image
+    defaultModel: process.env.GEMINI_DEFAULT_MODEL || 'gemini-3.1-pro-preview',
+    defaultDeepResearchModel: process.env.GEMINI_DEEP_RESEARCH_MODEL || 'gemini-3-flash-preview',
+    defaultImageAnalysisModel: process.env.GEMINI_IMAGE_ANALYSIS_MODEL || 'gemini-3.1-pro-preview',
+    defaultImageDescribeModel: process.env.GEMINI_IMAGE_DESCRIBE_MODEL || 'gemini-3-flash-preview',
+    defaultImageGenerationModel: process.env.GEMINI_IMAGE_GENERATION_MODEL || 'gemini-3-pro-image-preview',
     maxTokens: 65536,
     temperature: 1.0,
     defaultGrounding: true,

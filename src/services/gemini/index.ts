@@ -341,7 +341,23 @@ export class GeminiService extends BaseService {
         ? `${request.systemPrompt}\n\nUser: ${request.message}\n\nAssistant:`
         : request.message;
 
-      const result = await model.generateContent(prompt);
+      let result: any;
+      try {
+        result = await model.generateContent(prompt);
+      } catch (error) {
+        // When grounding is requested and fails with a quota/rate-limit error, retry without it.
+        // This allows deep research to still complete using the model's training knowledge.
+        if (shouldUseGrounding && this.isQuotaError(error as Error)) {
+          this.logWarning('Grounding quota exceeded, retrying without search grounding', {
+            model: modelName,
+            error: (error as Error).message.substring(0, 200)
+          });
+          const fallback = await this.chat({ ...request, grounding: false });
+          return { ...fallback, groundingDegraded: true };
+        }
+        throw error;
+      }
+
       const response = result.response;
 
       if (result.response.promptFeedback?.blockReason) {
@@ -426,6 +442,11 @@ export class GeminiService extends BaseService {
       this.logError('Chat generation failed', error as Error);
       throw new GeminiError(`Error generating response: ${(error as Error).message}`);
     }
+  }
+
+  private isQuotaError(error: Error): boolean {
+    const msg = error.message.toLowerCase();
+    return msg.includes('resource_exhausted') || msg.includes('quota') || msg.includes('429') || msg.includes('rate limit');
   }
 
   async listModels(): Promise<ListModelsResponse> {

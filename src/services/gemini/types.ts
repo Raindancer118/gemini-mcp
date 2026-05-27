@@ -37,6 +37,7 @@ export interface ChatResponse {
   finishReason?: string;
   groundingMetadata?: GroundingMetadata;
   usageMetadata?: UsageMetadata;
+  groundingDegraded?: boolean; // true when grounding was requested but fell back due to quota
 }
 
 export interface ModelInfo {

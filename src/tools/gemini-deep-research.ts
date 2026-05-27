@@ -100,10 +100,13 @@ export class GeminiDeepResearchTool {
             });
           }
 
-          if (searchResponse.groundingMetadata) {
+          if (searchResponse.groundingDegraded) {
+            logger.warn(`Iteration ${i + 1}: Search grounding quota exceeded — using model knowledge only`, {});
+            report += `> ⚠️ *Iteration ${i + 1}: Google Search quota exceeded — response uses model knowledge only (no live web search).*\n\n`;
+          } else if (searchResponse.groundingMetadata) {
             const hasSearches = (searchResponse.groundingMetadata.webSearchQueries?.length ?? 0) > 0;
             const hasSupports = (searchResponse.groundingMetadata.groundingSupports?.length ?? 0) > 0;
-            
+
             if (!hasSearches && !hasSupports) {
               logger.warn(`Iteration ${i + 1}: Grounding enabled but no searches performed`, {
                 responsePreview: searchResponse.content.substring(0, 200)
