@@ -74,11 +74,6 @@ class GeminiMcpServer {
 
   async start(): Promise<void> {
     try {
-      const isValid = await this.geminiService.validateConfig();
-      if (!isValid) {
-        throw new Error('Gemini API key validation failed');
-      }
-
       logger.info('Starting Gemini MCP Server...');
 
       await this.mediaServer.start();
@@ -112,6 +107,10 @@ class GeminiMcpServer {
         tools: [...TOOL_NAMES],
       });
 
+      // Connect the transport FIRST so the MCP initialize handshake completes
+      // immediately. The API-key check is a network call (googleapis); doing it
+      // before connecting can stall the handshake and make clients drop the
+      // connection (-32000) on slow networks. Validate in the background instead.
       const transport = new StdioServerTransport();
       await this.server.connect(transport);
 
@@ -120,6 +119,21 @@ class GeminiMcpServer {
         toolsAvailable: [...TOOL_NAMES],
         mediaServerPort: this.mediaServer.getPort(),
       });
+
+      void this.geminiService
+        .validateConfig()
+        .then((isValid) => {
+          if (!isValid) {
+            logger.warn(
+              'Gemini API key validation failed — API-backed tools will error until a valid GEMINI_API_KEY is set. (agy-based tools are unaffected.)'
+            );
+          }
+        })
+        .catch((error) => {
+          logger.warn('Gemini API key validation could not be completed', {
+            error: (error as Error).message,
+          });
+        });
     } catch (error) {
       logger.error('Failed to start Gemini MCP Server', { error });
       process.exit(1);
