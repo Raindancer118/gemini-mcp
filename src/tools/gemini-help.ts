@@ -10,7 +10,7 @@ const HELP_TOPICS: Record<string, string> = {
 ## Core Features
 • **Chat & Research:** gemini_chat, gemini_deep_research
 • **Agents:** gemini_agent, gemini_agent_models
-• **Documents:** ocr, generate_summary
+• **Documents:** ocr, generate_summary, transcribe, extract_structured_data
 • **Image Generation:** generate_image, edit_image
 • **Image Analysis:** describe_image, analyze_image
 • **Utilities:** gemini_list_models, load_image_from_path, generate_landing_page
@@ -332,7 +332,37 @@ generate_summary(
 • focus — optional angle to emphasise.
 • language — optional output language (defaults to source language).
 Tip: to summarise a scanned document, you can ocr() it first, then summarise
-the text — or just pass the file to generate_summary directly.`,
+the text — or just pass the file to generate_summary directly.
+
+## Tool: transcribe
+Transcribe speech from an audio or video file.
+\`\`\`
+transcribe(
+  file_path="/abs/meeting.m4a",
+  language="German",
+  timestamps=true,
+  diarization=true
+)
+\`\`\`
+• file_path (audio/video) OR data + mime_type for inline base64.
+• language — optional spoken-language hint.
+• timestamps — prefix lines with [mm:ss].
+• diarization — label speakers (Speaker 1, Speaker 2, ...).
+Returns the transcript text only.
+
+## Tool: extract_structured_data
+Pull structured JSON out of text or any file (JSON mode).
+\`\`\`
+extract_structured_data(
+  file_path="/abs/invoice.pdf",
+  instructions="invoice number, date, total, and an array of line items"
+)
+\`\`\`
+• instructions — describe the fields/data you want (required).
+• text OR file_path — file_path accepts text/code, PDF, image, audio, video.
+• json_schema — optional Gemini/OpenAPI-subset schema to enforce the shape.
+Returns parsed, pretty-printed JSON (falls back to raw text with a warning if
+the model returns invalid JSON).`,
 
   agents: `# Gemini Agents Guide
 

@@ -11,6 +11,10 @@ export interface ChatRequest {
   systemPrompt?: string;
   grounding?: boolean;
   thinkingLevel?: ThinkingLevel;
+  /** Force a response MIME type, e.g. 'application/json' for structured output. */
+  responseMimeType?: string;
+  /** Optional Gemini response schema (OpenAPI subset) to constrain JSON output. */
+  responseSchema?: unknown;
 }
 
 export interface ImageAnalysisRequest {
@@ -21,6 +25,10 @@ export interface ImageAnalysisRequest {
   maxTokens?: number;
   systemPrompt?: string;
   globalMediaResolution?: string;
+  /** Force a response MIME type, e.g. 'application/json' for structured output. */
+  responseMimeType?: string;
+  /** Optional Gemini response schema (OpenAPI subset) to constrain JSON output. */
+  responseSchema?: unknown;
 }
 
 export interface UsageMetadata {

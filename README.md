@@ -342,6 +342,8 @@ reasoning; list the exact labels with `gemini_agent_models`. See
 | `gemini_agent_models` | Lists the agent model labels available via `agy models` |
 | `ocr` | Extract text verbatim from images or PDFs (Markdown structure preserved) |
 | `generate_summary` | Summarise text or almost any local file (text/code, PDF, images, audio, video) |
+| `transcribe` | Transcribe speech from audio/video, with optional timestamps and speaker labels |
+| `extract_structured_data` | Extract structured JSON from text or any file (Gemini JSON mode, optional schema) |
 | `gemini_list_models` | Lists available models from the Gemini API |
 | `gemini_help` | Documentation for all features without leaving Claude |
 | `gemini_prompt_assistant` | Expert guidance for image generation with 9 chart design systems |

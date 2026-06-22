@@ -333,6 +333,13 @@ export class GeminiService extends BaseService {
         generationConfig.thinkingConfig = { thinkingLevel: request.thinkingLevel };
       }
 
+      if (request.responseMimeType) {
+        (generationConfig as any).responseMimeType = request.responseMimeType;
+      }
+      if (request.responseSchema) {
+        (generationConfig as any).responseSchema = request.responseSchema;
+      }
+
       const modelConfig: any = {
         model: modelName,
         safetySettings: this.mapSafetySettings(),
@@ -539,7 +546,11 @@ export class GeminiService extends BaseService {
         maxOutputTokens: request.maxTokens ?? 16384,
         ...(request.globalMediaResolution && {
           mediaResolution: request.globalMediaResolution
-        })
+        }),
+        ...(request.responseMimeType && {
+          responseMimeType: request.responseMimeType
+        }),
+        ...(request.responseSchema ? { responseSchema: request.responseSchema } : {})
       };
 
       const model = this.genAI.getGenerativeModel({
