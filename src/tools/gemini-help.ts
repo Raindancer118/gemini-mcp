@@ -10,6 +10,7 @@ const HELP_TOPICS: Record<string, string> = {
 ## Core Features
 • **Chat & Research:** gemini_chat, gemini_deep_research
 • **Agents:** gemini_agent, gemini_agent_models
+• **Documents:** ocr, generate_summary
 • **Image Generation:** generate_image, edit_image
 • **Image Analysis:** describe_image, analyze_image
 • **Utilities:** gemini_list_models, load_image_from_path, generate_landing_page
@@ -299,6 +300,40 @@ Comprehensive research report with:
 • Comparative analysis across domains
 • Questions with no single definitive answer`,
 
+  documents: `# Documents Guide (OCR & Summary)
+
+## Tool: ocr
+Extract text **verbatim** from images or PDFs (no summarising/analysis).
+\`\`\`
+ocr(
+  images=[{filePath="/abs/scan.pdf"}],
+  language="German"
+)
+\`\`\`
+• images — array; use filePath for large files (incl. .pdf).
+• language — optional language hint, improves accuracy.
+• global_media_resolution — default MEDIA_RESOLUTION_MEDIUM (same OCR quality
+  as HIGH at 50% token cost; ideal for documents).
+Returns the raw text as Markdown (headings/lists/tables preserved).
+
+## Tool: generate_summary
+Summarise text or **almost any local file**.
+\`\`\`
+generate_summary(
+  file_path="/abs/report.pdf",
+  length="bullets",
+  focus="risks and open questions"
+)
+\`\`\`
+• text OR file_path — file_path accepts text/code, PDF, images, audio, video
+  (loaded server-side; Office docs must be exported to PDF first). Text/code is
+  summarised directly; PDF/media go through the multimodal model.
+• length — brief | standard (default) | detailed | bullets.
+• focus — optional angle to emphasise.
+• language — optional output language (defaults to source language).
+Tip: to summarise a scanned document, you can ocr() it first, then summarise
+the text — or just pass the file to generate_summary directly.`,
+
   agents: `# Gemini Agents Guide
 
 ## Tools: gemini_agent, gemini_agent_models
@@ -578,6 +613,7 @@ export function registerGeminiHelp(server: McpServer): void {
           'chat',
           'deep_research',
           'agents',
+          'documents',
           'grounding',
           'media_resolution',
           'models',

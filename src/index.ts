@@ -26,6 +26,8 @@ import { register as registerLandingPage } from './tools/register-landing-page.j
 import { register as registerSvg } from './tools/register-svg.js';
 import { register as registerVideo } from './tools/register-video.js';
 import { register as registerAgent } from './tools/register-agent.js';
+import { register as registerOcr } from './tools/register-ocr.js';
+import { register as registerSummary } from './tools/register-summary.js';
 
 import type { ToolContext } from './tools/types.js';
 
@@ -38,6 +40,7 @@ const TOOL_NAMES = [
   'generate_video',
   'load_image_from_path', 'generate_landing_page', 'generate_svg',
   'gemini_agent', 'gemini_agent_models',
+  'ocr', 'generate_summary',
   'gemini_help', 'gemini_prompt_assistant',
 ] as const;
 
@@ -101,6 +104,8 @@ class GeminiMcpServer {
       registerSvg(ctx);
       registerVideo(ctx);
       registerAgent(ctx);
+      registerOcr(ctx);
+      registerSummary(ctx);
 
       logger.info('Tools registered', {
         toolCount: TOOL_NAMES.length,

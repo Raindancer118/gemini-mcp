@@ -340,6 +340,8 @@ reasoning; list the exact labels with `gemini_agent_models`. See
 | `gemini_deep_research` | Real Google Deep Research agent (Interactions API): autonomous multi-step web research, synthesised cited report |
 | `gemini_agent` | Launch an autonomous Gemini agent (`agy`) that reads/edits files and runs commands in a directory. Returns a `conversation_id` for follow-ups |
 | `gemini_agent_models` | Lists the agent model labels available via `agy models` |
+| `ocr` | Extract text verbatim from images or PDFs (Markdown structure preserved) |
+| `generate_summary` | Summarise text or almost any local file (text/code, PDF, images, audio, video) |
 | `gemini_list_models` | Lists available models from the Gemini API |
 | `gemini_help` | Documentation for all features without leaving Claude |
 | `gemini_prompt_assistant` | Expert guidance for image generation with 9 chart design systems |

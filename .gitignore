@@ -78,11 +78,9 @@ wp-sites.json
 service-account-key.json
 credentials.json
 
-# Local test files
+# Local scratch test files (jest *.test.ts / *.spec.ts ARE tracked)
 test_*
 test-*.js
-*.test.ts
-*.spec.ts
 
 # Development helper files - Don't commit to production
 CHANGES_SUMMARY.md

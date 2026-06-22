@@ -14,11 +14,16 @@ export default {
     '^.+\\.ts$': [
       'ts-jest',
       {
+        // Transpile-only: type-checking is done by `npm run build:server`.
+        // This keeps the runner fast and avoids deep zod×SDK type instantiation
+        // errors (TS2589) that don't affect the real build.
+        isolatedModules: true,
         tsconfig: {
           module: 'CommonJS',
           moduleResolution: 'Node',
           esModuleInterop: true,
           verbatimModuleSyntax: false,
+          skipLibCheck: true,
         },
       },
     ],

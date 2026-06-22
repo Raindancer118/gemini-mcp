@@ -9,6 +9,8 @@ const MIME_TYPES: Record<string, string> = {
   '.gif': 'image/gif',
   '.webp': 'image/webp',
   '.bmp': 'image/bmp',
+  // PDFs are accepted by the multimodal models too (used by the ocr tool).
+  '.pdf': 'application/pdf',
 };
 
 export interface ImageInput {
