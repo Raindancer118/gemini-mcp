@@ -38,9 +38,24 @@ export interface AgyConfig {
   autoApprove: boolean;      // pass --dangerously-skip-permissions by default
 }
 
+/**
+ * Configuration for spawning autonomous agents through the `opencode` CLI.
+ * opencode handles provider auth/config itself (e.g. a `z-ai` provider for GLM
+ * in ~/.config/opencode/opencode.json), so this MCP needs no model API key —
+ * it just drives opencode and selects a model via `provider/model`.
+ */
+export interface OpencodeConfig {
+  binary: string;             // path/name of the opencode executable
+  defaultModel?: string;      // `provider/model`, e.g. "z-ai/glm-5.2"
+  defaultVariant?: string;    // reasoning effort: minimal | low | high | max
+  defaultDir?: string;        // working directory agents run in
+  handshakeTimeoutMs: number; // how long to wait for the session id on spawn
+}
+
 export interface Config {
   gemini: GeminiConfig;
   agy: AgyConfig;
+  opencode: OpencodeConfig;
   server: ServerConfig;
   logging: {
     level: string;

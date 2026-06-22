@@ -44,6 +44,17 @@ export const config: Config = {
     // waiting for a permission prompt nobody can answer. Opt out with =false.
     autoApprove: process.env.GEMINI_AGY_AUTO_APPROVE !== 'false'
   },
+  opencode: {
+    binary: process.env.OPENCODE_BIN || 'opencode',
+    // Default agent model is GLM-5.2 at full reasoning effort. opencode handles
+    // the provider auth (here: OpenRouter); override per-call or via env.
+    defaultModel: process.env.OPENCODE_DEFAULT_MODEL || 'openrouter/z-ai/glm-5.2',
+    defaultVariant: process.env.OPENCODE_DEFAULT_VARIANT || 'high',
+    defaultDir: process.env.OPENCODE_DEFAULT_DIR || undefined,
+    handshakeTimeoutMs: process.env.OPENCODE_HANDSHAKE_SECONDS
+      ? Math.max(5, parseInt(process.env.OPENCODE_HANDSHAKE_SECONDS, 10) || 30) * 1000
+      : 30_000
+  },
   server: {
     name: 'gemini-mcp',
     version: '2.2.4',

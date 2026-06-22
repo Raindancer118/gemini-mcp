@@ -9,6 +9,7 @@ import { config, validateConfig } from './config/index.js';
 import { GeminiService } from './services/gemini/index.js';
 import { GeminiImageService } from './services/gemini/image-service.js';
 import { AgyService } from './services/agy/index.js';
+import { OpencodeService } from './services/opencode/index.js';
 import { MediaServer } from './services/media-server.js';
 import logger from './utils/logger.js';
 
@@ -30,6 +31,7 @@ import { register as registerOcr } from './tools/register-ocr.js';
 import { register as registerSummary } from './tools/register-summary.js';
 import { register as registerTranscribe } from './tools/register-transcribe.js';
 import { register as registerExtract } from './tools/register-extract.js';
+import { register as registerOpencodeAgent } from './tools/register-opencode-agent.js';
 
 import type { ToolContext } from './tools/types.js';
 
@@ -43,6 +45,8 @@ const TOOL_NAMES = [
   'load_image_from_path', 'generate_landing_page', 'generate_svg',
   'gemini_agent', 'gemini_agent_models',
   'ocr', 'generate_summary', 'transcribe', 'extract_structured_data',
+  'agent_spawn', 'agent_send', 'agent_status', 'agent_thoughts',
+  'agent_cost', 'agent_models', 'agent_stop',
   'gemini_help', 'gemini_prompt_assistant',
 ] as const;
 
@@ -50,6 +54,7 @@ class GeminiMcpServer {
   private server: McpServer;
   private geminiService: GeminiService;
   private agyService: AgyService;
+  private opencodeService: OpencodeService;
   private mediaServer: MediaServer;
   private outputDir: string;
 
@@ -63,6 +68,7 @@ class GeminiMcpServer {
 
     this.geminiService = new GeminiService(config.gemini, config.server.imageOutputDir);
     this.agyService = new AgyService(config.agy);
+    this.opencodeService = new OpencodeService(config.opencode);
     this.outputDir = config.server.imageOutputDir || DEFAULT_IMAGE_OUTPUT_DIR;
     this.mediaServer = new MediaServer(this.outputDir);
 
@@ -88,6 +94,7 @@ class GeminiMcpServer {
         geminiService: this.geminiService,
         imageService: new GeminiImageService(config.gemini),
         agyService: this.agyService,
+        opencodeService: this.opencodeService,
         outputDir: this.outputDir,
         mediaServer: this.mediaServer,
       };
@@ -110,6 +117,7 @@ class GeminiMcpServer {
       registerSummary(ctx);
       registerTranscribe(ctx);
       registerExtract(ctx);
+      registerOpencodeAgent(ctx);
 
       logger.info('Tools registered', {
         toolCount: TOOL_NAMES.length,
