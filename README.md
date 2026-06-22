@@ -17,7 +17,7 @@ Thirteen tools. One `npx` command.
 
 > **Quick Navigation**
 >
-> [Get started](#get-started-in-two-minutes) | [What it does](#what-it-does) | [SVG generation](#svg-generation) | [Image output](#image-output-and-storage) | [Configuration](#configuration-reference) | [Tools](#tools-reference) | [Models](#model-reference) | [Requirements](#requirements)
+> [Get started](#get-started-in-two-minutes) | [What it does](#what-it-does) | [SVG generation](#svg-generation) | [Image output](#image-output-and-storage) | [Configuration](#configuration-reference) | [Agents](#agents) | [Tools](#tools-reference) | [Models](#model-reference) | [Requirements](#requirements)
 
 ---
 
@@ -132,12 +132,12 @@ Supports `thinking_level` on Gemini 3 models: `high` for maximum reasoning depth
 ```
 Use gemini:gemini_deep_research with:
   research_question="What are the current approaches to AI agent memory management?"
-  max_iterations=5
+  focus_areas=["episodic memory", "retrieval"]
 ```
 
-Runs multiple grounded search iterations then synthesises a full report. Takes 2-5 minutes depending on complexity — worth it for anything needing comprehensive coverage rather than a quick answer.
+Runs Google's **real Deep Research agent** through the Gemini Interactions API: it autonomously performs many rounds of live web search and returns a synthesised, cited report. This is the actual Deep Research product — not a grounding-augmented chat loop. The interaction runs asynchronously (created in the background, then polled) and takes several minutes.
 
-Set `max_iterations` to 3-4 in Claude Desktop (4-minute tool timeout). In IDEs (Cursor, Windsurf, VS Code) or agent frameworks, 7-10 iterations produces noticeably better synthesis. Pass `focus_areas` as an array to steer toward specific angles.
+Pick the agent with `model`: `deep-research-pro-preview-12-2025` (default), `deep-research-preview-04-2026`, or `deep-research-max-preview-04-2026` (most thorough, slowest). Pass `focus_areas` as an array to steer toward specific angles. Requires Interactions API access on your Gemini key.
 
 
 ### Image generation with search grounding
@@ -298,11 +298,38 @@ Gemini returns 2-5MB images. The resize is smart — it measures the non-image o
 |----------|----------|---------|-------------|
 | `GEMINI_API_KEY` | Yes | — | Google AI API key from [AI Studio](https://aistudio.google.com/apikey) |
 | `GEMINI_DEFAULT_MODEL` | No | `gemini-3.1-pro-preview` | Default model for `gemini_chat` and `analyze_image` |
+| `GEMINI_DEEP_RESEARCH_AGENT` | No | `deep-research-pro-preview-12-2025` | Deep Research agent for `gemini_deep_research` |
 | `GEMINI_DEFAULT_GROUNDING` | No | `true` | Enable Google Search grounding by default |
 | `GEMINI_IMAGE_OUTPUT_DIR` | No | — | Auto-save directory for generated images and videos |
 | `GEMINI_ALLOW_EXPERIMENTAL` | No | `false` | Include experimental/preview models in auto-discovery |
 | `GEMINI_MCP_LOG_FILE` | No | `false` | Write logs to `~/.gemini-mcp/logs/` |
 | `DEBUG_MCP` | No | `false` | Log to stderr for debugging tool calls |
+| `GEMINI_AGY_BIN` | No | `agy` | Path/name of the `agy` executable for the agent tools |
+| `GEMINI_AGY_MODEL` | No | — | Default agent model label (e.g. `Gemini 3.1 Pro (High)`) |
+| `GEMINI_AGY_TIMEOUT_SECONDS` | No | `600` | Default hard timeout per agent run |
+| `GEMINI_AGY_AUTO_APPROVE` | No | `true` | Auto-approve agent tool calls (`false` requires prompts) |
+
+
+## Agents
+
+Beyond single-shot text, the server can launch **autonomous Gemini agents** via
+the `agy` CLI. Where `gemini_chat` returns one answer, `gemini_agent`
+gives the model a working directory in which it can read & edit files and run
+shell commands to actually carry out a multi-step task, then reports back — so
+Claude can delegate self-contained coding/research/automation jobs to a Gemini
+coworker and iterate via the returned `conversation_id`.
+
+```text
+Use gemini:gemini_agent with:
+  task="In ./service, add input validation to the POST /users endpoint and a test for it."
+  directory="/abs/path/service"
+  model="Gemini 3.1 Pro (High)"
+```
+
+The agent uses `agy`'s own login (Antigravity / Cloud Code) — independent of
+`GEMINI_API_KEY`. Pick a *Flash* model for speed, a *Pro/High* model for harder
+reasoning; list the exact labels with `gemini_agent_models`. See
+`gemini_help topic="agents"` for the full parameter reference.
 
 
 ## Tools reference
@@ -310,7 +337,9 @@ Gemini returns 2-5MB images. The resize is smart — it measures the non-image o
 | Tool | Description |
 |------|-------------|
 | `gemini_chat` | Chat with Gemini 3.1 Pro. Google Search grounding on by default. Supports `thinking_level` |
-| `gemini_deep_research` | Multi-step iterative research with Google Search. Synthesises comprehensive reports |
+| `gemini_deep_research` | Real Google Deep Research agent (Interactions API): autonomous multi-step web research, synthesised cited report |
+| `gemini_agent` | Launch an autonomous Gemini agent (`agy`) that reads/edits files and runs commands in a directory. Returns a `conversation_id` for follow-ups |
+| `gemini_agent_models` | Lists the agent model labels available via `agy models` |
 | `gemini_list_models` | Lists available models from the Gemini API |
 | `gemini_help` | Documentation for all features without leaving Claude |
 | `gemini_prompt_assistant` | Expert guidance for image generation with 9 chart design systems |
@@ -334,6 +363,7 @@ Gemini returns 2-5MB images. The resize is smart — it measures the non-image o
 | `gemini-2.5-flash-image` | `generate_image` (optional) | Faster generation, higher volume |
 | `gemini-3-flash-preview` | `describe_image` | Fast general descriptions |
 | `veo-3.1-generate-preview` | `generate_video` | Veo 3.1 — 4K video with native audio |
+| `deep-research-pro-preview-12-2025` | `gemini_deep_research` | Real Deep Research agent (Interactions API). Also: `deep-research-preview-04-2026`, `deep-research-max-preview-04-2026` |
 
 **Gemini 3 notes:** Temperature is forced to 1.0 on Gemini 3 models (Google's requirement — lower values cause looping). Thinking level only applies to `gemini_chat`.
 

@@ -10,24 +10,16 @@ export function register(ctx: ToolContext): void {
     {
       title: 'Gemini Deep Research',
       description:
-        'Conduct deep research on complex topics using iterative multi-step analysis with Gemini. ' +
-        'This performs multiple searches and synthesizes comprehensive research reports (takes several minutes). ' +
-        '[MCP_RECOMMENDED_TIMEOUT_MS: 900000]',
+        'Conduct real Deep Research on complex topics: Google\'s autonomous Deep Research agent does multi-step ' +
+        'live web search and returns a synthesised, cited report (takes several minutes). Runs the actual Deep ' +
+        'Research agents via the Gemini Interactions API. [MCP_RECOMMENDED_TIMEOUT_MS: 900000]',
       inputSchema: {
         research_question: z.string().describe('The complex research question or topic to investigate deeply'),
         model: z.string()
           .optional()
-          .describe('Model to use for deep research (defaults to latest available)'),
-        max_iterations: z.number()
-          .int()
-          .min(1)
-          .max(10)
-          .optional()
-          .default(1)
           .describe(
-            'Number of research iterations (1-10, default 1). Environment guidance: ' +
-            'Claude Desktop: use 1-2 (4-min timeout). ' +
-            'Agent SDK/IDEs (VSCode, Cursor, Windsurf)/AI platforms (Cline, Roo-Cline): can use 5-7 (longer timeout tolerance)'
+            'Deep Research agent to use: "deep-research-pro-preview-12-2025" (default), ' +
+            '"deep-research-preview-04-2026", or "deep-research-max-preview-04-2026" (most thorough/slowest).'
           ),
         focus_areas: z.array(z.string())
           .optional()
@@ -38,18 +30,17 @@ export function register(ctx: ToolContext): void {
         success: z.boolean()
       }
     },
-    async ({ research_question, model, max_iterations, focus_areas }) => {
+    async ({ research_question, model, focus_areas }) => {
       try {
         logger.info('Starting deep research', {
           question: research_question,
-          maxIterations: max_iterations || 1
+          model
         });
 
         const deepResearchTool = new GeminiDeepResearchTool(ctx.geminiService);
         const result = await deepResearchTool.execute({
           research_question,
           model,
-          max_iterations,
           focus_areas
         });
 

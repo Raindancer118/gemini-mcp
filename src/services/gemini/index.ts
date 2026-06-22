@@ -11,6 +11,7 @@ import {
 } from './types.js';
 import { GeminiError } from '../../utils/error-handler.js';
 import { GeminiVideoService, GenerateVideoOptions, GeneratedVideoResult } from './video-service.js';
+import { DeepResearchService, DeepResearchOptions, DeepResearchResult } from './deep-research-service.js';
 
 // Gemini 3+ models require temperature 1.0.
 // Google's docs warn lower values cause looping or degraded reasoning.
@@ -34,21 +35,32 @@ export class GeminiService extends BaseService {
   private modelsInitialized: boolean = false;
   private initializationPromise: Promise<void> | null = null;
   private videoService: GeminiVideoService;
+  private deepResearchService: DeepResearchService;
 
   constructor(config: GeminiConfig, outputDir?: string) {
     super();
     this.config = config;
-    
+
     if (!config.apiKey) {
       throw new GeminiError('Missing API key for Gemini service');
     }
-    
+
     this.genAI = new GoogleGenerativeAI(config.apiKey);
     this.defaultModel = config.defaultModel;
     this.availableModels = this.getFallbackModels();
     this.videoService = new GeminiVideoService(config, outputDir);
-    
+    this.deepResearchService = new DeepResearchService(config.apiKey, config.defaultDeepResearchAgent);
+
     this.logInfo('Gemini service initialized');
+  }
+
+  /** Real Google Deep Research via the Interactions API (async, polled). */
+  async deepResearch(opts: DeepResearchOptions): Promise<DeepResearchResult> {
+    return this.deepResearchService.research(opts);
+  }
+
+  getDeepResearchAgent(): string {
+    return this.config.defaultDeepResearchAgent;
   }
 
   private async ensureModelsInitialized(): Promise<void> {
@@ -224,10 +236,6 @@ export class GeminiService extends BaseService {
 
   getDefaultModel(): string {
     return this.defaultModel;
-  }
-
-  getDeepResearchModel(): string {
-    return this.config.defaultDeepResearchModel || this.defaultModel;
   }
 
   private addInlineCitations(text: string, groundingMetadata: any): string {

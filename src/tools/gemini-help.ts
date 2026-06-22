@@ -9,12 +9,14 @@ const HELP_TOPICS: Record<string, string> = {
 
 ## Core Features
 • **Chat & Research:** gemini_chat, gemini_deep_research
+• **Agents:** gemini_agent, gemini_agent_models
 • **Image Generation:** generate_image, edit_image
 • **Image Analysis:** describe_image, analyze_image
 • **Utilities:** gemini_list_models, load_image_from_path, generate_landing_page
 • **Help:** gemini_help (this tool)
 
 ## Quick Start
+\`gemini_help topic="agents"\` - Launching autonomous Gemini agents
 \`gemini_help topic="image_generation"\` - Image generation guide
 \`gemini_help topic="grounding"\` - Search grounding features
 \`gemini_help topic="media_resolution"\` - Token optimization
@@ -251,41 +253,37 @@ Returns current information with source citations.`,
 ## Tool: gemini_deep_research
 
 ### Purpose
-Conduct comprehensive multi-step research on complex topics using iterative analysis.
+Conduct comprehensive multi-step research on complex topics with live web search.
 
 ### Usage
 \`\`\`
 gemini_deep_research(
   research_question="What are the implications of quantum computing for cryptography?",
-  max_iterations=5,
   focus_areas=["RSA encryption", "Post-quantum algorithms"]
 )
 \`\`\`
+
+### How it works
+Runs Google's real Deep Research agent through the Gemini Interactions API.
+The agent autonomously performs many rounds of live web search and returns a
+synthesised, cited report — the actual Deep Research product, not a
+grounding-augmented chat. Runs asynchronously (created as a background
+interaction, then polled) and takes several minutes.
 
 ### Parameters
 
 **research_question** (required)
 Complex research question or topic to investigate deeply
 
-**max_iterations** (optional, default: 5)
-Number of research iterations (3-10)
-More iterations = deeper research but longer wait time
-• 3-4: Quick overview (4-8 minutes)
-• 5-7: Comprehensive analysis (8-15 minutes)
-• 8-10: Exhaustive research (15-25 minutes)
+**model** (optional, default "deep-research-pro-preview-12-2025")
+Deep Research agent to use:
+• deep-research-pro-preview-12-2025 — default
+• deep-research-preview-04-2026
+• deep-research-max-preview-04-2026 — most thorough (and slowest)
 
 **focus_areas** (optional, array)
 Specific areas to focus the research on
 Example: ["clinical trials", "side effects", "dosage"]
-
-**model** (optional)
-Research model to use (defaults to latest available)
-
-### How It Works
-1. Initial search and information gathering
-2. Iterative deepening with follow-up queries
-3. Cross-referencing and validation
-4. Synthesis into comprehensive report
 
 ### Returns
 Comprehensive research report with:
@@ -300,6 +298,69 @@ Comprehensive research report with:
 • Academic or technical research
 • Comparative analysis across domains
 • Questions with no single definitive answer`,
+
+  agents: `# Gemini Agents Guide
+
+## Tools: gemini_agent, gemini_agent_models
+
+Launch an **autonomous Gemini agent** through the \`agy\` CLI. Where gemini_chat
+returns one text answer, an agent can read & edit files and run shell commands
+in a working directory to actually *do* multi-step work, then reports back.
+Think of it as delegating a self-contained task to a Gemini coworker.
+
+### Basic Usage
+\`\`\`
+gemini_agent(
+  task="In /home/me/proj, add a --json flag to the CLI and update the README.",
+  directory="/home/me/proj",
+  model="Gemini 3.1 Pro (High)"
+)
+\`\`\`
+
+### Parameters
+**task** (required)
+Self-contained instructions: goal, relevant paths, constraints, definition of
+done. The agent runs unattended — there is no chance to clarify mid-run.
+
+**model** (optional)
+Exact label from \`gemini_agent_models\`, e.g. "Gemini 3.5 Flash (Low)" (fast,
+cheap) or "Gemini 3.1 Pro (High)" (deeper reasoning, slower). Note: these are
+agent labels and differ from the API models in gemini_list_models.
+
+**directory** (optional)
+Primary working directory (the agent's cwd). Defaults to the server's cwd.
+
+**add_directories** (optional, array)
+Extra paths to grant the agent access to.
+
+**conversation_id** (optional)
+Returned by a previous run. Pass it back to continue iterating with the same
+agent, keeping its context.
+
+**continue_recent** (optional, default false)
+Continue the most recent agent conversation (ignored if conversation_id set).
+
+**auto_approve** (optional, default true)
+Auto-approve the agent's tool/permission requests so it can work unattended.
+Disabling it will make the agent stall, since print mode has no interactive
+approver. Override the default with env GEMINI_AGY_AUTO_APPROVE=false.
+
+**sandbox** (optional, default false)
+Run inside agy's restricted sandbox (limited terminal).
+
+**timeout_seconds** (optional)
+Hard budget. Pro/High runs can take minutes; raise this for big tasks.
+
+### Returns
+The agent's final report, plus a footer with the **conversation_id** (for
+follow-ups), the model used, and the wall-clock duration. If the run hits the
+timeout you get a partial result and a warning — continue via conversation_id.
+
+### Tips
+• Start with a Flash model for quick/cheap tasks; switch to Pro for hard ones.
+• Keep tasks self-contained and scoped to a directory.
+• Iterate: launch → review the report → continue with conversation_id.
+• Auth is agy's own (Antigravity / Cloud Code login), independent of GEMINI_API_KEY.`,
 
   grounding: `# Google Search Grounding Guide
 
@@ -516,6 +577,7 @@ export function registerGeminiHelp(server: McpServer): void {
           'image_analysis',
           'chat',
           'deep_research',
+          'agents',
           'grounding',
           'media_resolution',
           'models',

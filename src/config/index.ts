@@ -25,7 +25,7 @@ export const config: Config = {
       }
     ],
     defaultModel: process.env.GEMINI_DEFAULT_MODEL || 'gemini-3.1-pro-preview',
-    defaultDeepResearchModel: process.env.GEMINI_DEEP_RESEARCH_MODEL || 'gemini-3-flash-preview',
+    defaultDeepResearchAgent: process.env.GEMINI_DEEP_RESEARCH_AGENT || 'deep-research-pro-preview-12-2025',
     defaultImageAnalysisModel: process.env.GEMINI_IMAGE_ANALYSIS_MODEL || 'gemini-3.1-pro-preview',
     defaultImageDescribeModel: process.env.GEMINI_IMAGE_DESCRIBE_MODEL || 'gemini-3-flash-preview',
     defaultImageGenerationModel: process.env.GEMINI_IMAGE_GENERATION_MODEL || 'gemini-3-pro-image-preview',
@@ -33,6 +33,16 @@ export const config: Config = {
     temperature: 1.0,
     defaultGrounding: true,
     allowExperimentalModels: process.env.GEMINI_ALLOW_EXPERIMENTAL === 'true'
+  },
+  agy: {
+    binary: process.env.GEMINI_AGY_BIN || 'agy',
+    defaultModel: process.env.GEMINI_AGY_MODEL || undefined,
+    defaultTimeoutMs: process.env.GEMINI_AGY_TIMEOUT_SECONDS
+      ? Math.max(10, parseInt(process.env.GEMINI_AGY_TIMEOUT_SECONDS, 10) || 600) * 1000
+      : 600_000,
+    // Non-interactive agents must auto-approve tool calls or they block forever
+    // waiting for a permission prompt nobody can answer. Opt out with =false.
+    autoApprove: process.env.GEMINI_AGY_AUTO_APPROVE !== 'false'
   },
   server: {
     name: 'gemini-mcp',

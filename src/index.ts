@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { config, validateConfig } from './config/index.js';
 import { GeminiService } from './services/gemini/index.js';
 import { GeminiImageService } from './services/gemini/image-service.js';
+import { AgyService } from './services/agy/index.js';
 import { MediaServer } from './services/media-server.js';
 import logger from './utils/logger.js';
 
@@ -24,6 +25,7 @@ import { register as registerImageGen } from './tools/register-image-gen.js';
 import { register as registerLandingPage } from './tools/register-landing-page.js';
 import { register as registerSvg } from './tools/register-svg.js';
 import { register as registerVideo } from './tools/register-video.js';
+import { register as registerAgent } from './tools/register-agent.js';
 
 import type { ToolContext } from './tools/types.js';
 
@@ -35,12 +37,14 @@ const TOOL_NAMES = [
   'generate_image', 'edit_image', 'describe_image', 'analyze_image',
   'generate_video',
   'load_image_from_path', 'generate_landing_page', 'generate_svg',
+  'gemini_agent', 'gemini_agent_models',
   'gemini_help', 'gemini_prompt_assistant',
 ] as const;
 
 class GeminiMcpServer {
   private server: McpServer;
   private geminiService: GeminiService;
+  private agyService: AgyService;
   private mediaServer: MediaServer;
   private outputDir: string;
 
@@ -53,6 +57,7 @@ class GeminiMcpServer {
     }
 
     this.geminiService = new GeminiService(config.gemini, config.server.imageOutputDir);
+    this.agyService = new AgyService(config.agy);
     this.outputDir = config.server.imageOutputDir || DEFAULT_IMAGE_OUTPUT_DIR;
     this.mediaServer = new MediaServer(this.outputDir);
 
@@ -82,6 +87,7 @@ class GeminiMcpServer {
         server: this.server,
         geminiService: this.geminiService,
         imageService: new GeminiImageService(config.gemini),
+        agyService: this.agyService,
         outputDir: this.outputDir,
         mediaServer: this.mediaServer,
       };
@@ -99,6 +105,7 @@ class GeminiMcpServer {
       registerLandingPage(ctx);
       registerSvg(ctx);
       registerVideo(ctx);
+      registerAgent(ctx);
 
       logger.info('Tools registered', {
         toolCount: TOOL_NAMES.length,
